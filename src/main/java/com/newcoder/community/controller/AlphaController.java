@@ -1,18 +1,17 @@
 package com.newcoder.community.controller;//Controller是用于回应前端的请求
 
-import com.newcoder.community.entity.DiscussPost;
-import com.newcoder.community.entity.User;
 import com.newcoder.community.services.AlphaServices;
-import com.newcoder.community.services.DiscussPostService;
-import com.newcoder.community.services.UserService;
+import com.newcoder.community.util.CommunityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.PrintWriter;
 import java.util.*;
 
@@ -21,10 +20,6 @@ import java.util.*;
 public class AlphaController {
     @Autowired
     private AlphaServices alphaServices;
-    @Autowired
-    private DiscussPostService discussPostService;
-    @Autowired
-    private UserService userService;
     @GetMapping("/hello")//Get方法获取映射
     @ResponseBody
     public String Hello(){
@@ -65,13 +60,8 @@ public class AlphaController {
     //页面访问GET请求，将参数用?传递
     // /students?current = 1 & limit = 20
     @RequestMapping(path = "/students",method = RequestMethod.GET)
-    @ResponseBody
-    public String getStudent(
-            @RequestParam(name = "current",required = false,defaultValue = "1") int current,//传参
-            @RequestParam(name = "limit",required = false,defaultValue = "1") int limit){
-            System.out.println(current);
-            System.out.println(limit);
-        return "some students!";
+    public String getStudent(){
+        return "site/student";
     }
     //路径访问GET请求，将参数写入路径
     // /student/xxx
@@ -94,7 +84,7 @@ public class AlphaController {
     //响应HTML数据
 
     @RequestMapping(path = "/teacher", method = RequestMethod.GET)
-    public ModelAndView getTeacher(){
+    public ModelAndView getTeacher () {
         ModelAndView mav = new ModelAndView();
         mav.addObject("name","张三");
         mav.addObject("age",30);
@@ -102,7 +92,7 @@ public class AlphaController {
         return mav;
     }
     @RequestMapping(path = "/school", method = RequestMethod.GET)
-    public String getSchool(Model model){
+    public String getSchool (Model model) {
         model.addAttribute("name","FAFU");
         model.addAttribute("age",87);
         return "/demo/view";
@@ -120,7 +110,7 @@ public class AlphaController {
 
     @RequestMapping(path = "/emp",method = RequestMethod.GET)
     @ResponseBody//访问的是JSON就要写
-    public Map<String , Object> getEmp(){
+    public Map<String , Object> getEmp () {
         Map<String, Object> emp = new HashMap<>();
         emp.put("name","张三");
         emp.put("age",25);
@@ -153,6 +143,57 @@ public class AlphaController {
         return list;
     }
 
+    // 23.3.8
+    @RequestMapping(path = "/cookie/set",method = RequestMethod.GET)
+    @ResponseBody
+    public String setCookie (HttpServletResponse httpServletResponse) {
 
+        // 创建cookie
+        Cookie cookie = new Cookie("code", CommunityUtil.generateUUID());
 
+        // 设置生效范围
+        cookie.setPath("/community/Alpha");
+
+        // 设置cookie的生存时间
+        cookie.setMaxAge(60 * 10);
+
+        // 发送cookie
+        httpServletResponse.addCookie(cookie);
+        return "set cookie";
+    }
+    // 23.3.8
+    // cookie测试
+    // cookie缺点：不安全，增加流量消耗
+    @RequestMapping(path = "/cookie/get", method = RequestMethod.GET)
+    @ResponseBody
+    public String getCookie (@CookieValue("code") String code) {
+        System.out.println(code);
+        return "get cookie";
+    }
+    // session消耗服务器资源比较多，
+    // 服务器会访问nginx（负载均衡服务器），并且在分布式下无法同步用户数据（一个服务器有，另一个没有）
+    // 解决办法：黏性session（把ip分发给古风服务器，会导致负载不均衡）、同步session（把session同步给每一台服务器，但是影响性能）、共享session（使用一台服务器专门存储session，但是稳定性比较差）
+    // 最好的方法是存储到Redis数据库中
+    @RequestMapping(path = "/session/set", method = RequestMethod.GET)
+    @ResponseBody
+    public String setSession (HttpSession httpSession) {
+        httpSession.setAttribute("id",1);
+        httpSession.setAttribute("name","123");
+        return "set session";
+    }
+
+    @RequestMapping(path = "/session/get", method = RequestMethod.GET)
+    @ResponseBody
+    public String getSession (HttpSession httpSession) {
+        System.out.println(httpSession.getAttribute("id"));
+        System.out.println(httpSession.getAttribute("name"));
+        return "get session";
+    }
+
+    @RequestMapping(path = "/ajax", method = RequestMethod.POST)
+    public String restAjax (String name, int age) {
+        System.out.println(name);
+        System.out.println(age);
+        return CommunityUtil.getJSONString(0,"操作成功");
+    }
 }

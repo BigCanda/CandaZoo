@@ -1,16 +1,42 @@
 package com.newcoder.community.entity;
-
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.util.Date;
-
+@Document(indexName = "discusspost", shards = 6 ,replicas = 3)
 public class DiscussPost {
+    // Elasticsearch的ID
+    @Id
     private int id;
+
+    //Elasticsearch映射数据类型
+    @Field(type = FieldType.Integer)
     private int userId;
+    // 这里的analyzer是分词器,searchAnalyzer指的是分词策略
+    // 如果需要将某个属性作为关键字那么就需要加上分词器与分词策略
+    @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String title;
+    @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart") // 分词器analyzer
     private String content;
+    @Field(type = FieldType.Integer)
     private int type;
+    @Field(type = FieldType.Integer)
     private int status;
+    @Field(type = FieldType.Date)
     private Date createTime;
+    @Field(type = FieldType.Integer)
     private int commentCount;
+    @Field(type = FieldType.Double)
+    private int score;
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
 
     @Override
     public String toString() {
@@ -23,6 +49,7 @@ public class DiscussPost {
                 ", status=" + status +
                 ", createTime=" + createTime +
                 ", commentCount=" + commentCount +
+                ", commentCount=" + score +
                 '}';
     }
 

@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.text.SimpleDateFormat;
 
-@Configuration//这个程序是配置类
+@Configuration// 这个程序是配置类
 public class AlphaConfig {
 
     @Bean

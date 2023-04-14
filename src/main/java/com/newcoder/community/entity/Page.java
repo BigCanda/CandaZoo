@@ -1,4 +1,13 @@
 package com.newcoder.community.entity;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.elasticsearch.core.query.Order;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /*
 封装分页相关信息的组件
  */
@@ -83,4 +92,6 @@ public class Page {
         int total = getTotal();
         return to > total ? total : to;
     }
+
+
 }

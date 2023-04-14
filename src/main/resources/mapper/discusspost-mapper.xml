@@ -2,11 +2,15 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.newcoder.community.dao.DiscussMapper"><!--mapper包的位置-->
+<mapper namespace="com.newcoder.community.dao.DiscussPostMapper"><!--mapper包的位置,从这个位置扫描-->
 
     <sql id = "commentSelectFields">
         id, user_id, title, content, type, status, create_time, comment_count, score
     </sql>
+    <sql id = "commentInsertFields">
+        user_id, title, content, type, status, create_time, comment_count, score
+    </sql>
+
 
     <select id="selectDiscussPosts" resultType="DiscussPost">
         select <include refid="commentSelectFields"></include>
@@ -27,5 +31,31 @@
             and user_id = #{userId}
         </if>
     </select>
+
+    <insert id="insertDiscussPost" parameterType="DiscussPost" useGeneratedKeys="true" keyProperty="id" >
+        insert into discuss_post(<include refid="commentInsertFields"></include>)
+        values(#{userId},#{title},#{content},#{type},#{status},#{createTime},#{commentCount},#{score})
+    </insert>
+
+    <select id="selectDiscussPostById" resultType="DiscussPost">
+        select <include refid="commentSelectFields"></include>
+        from discuss_post
+        where id = #{id}
+    </select>
+
+    <update id="updateCommentCount" parameterType="int">
+        update discuss_post set comment_count = #{commentCount}
+        where id = #{id}
+    </update>
+
+    <update id="updateDiscussPostStatus" parameterType="int">
+        update discuss_post set status = #{status}
+        where id = #{id}
+    </update>
+
+    <update id="updateDiscussPostType" parameterType="int">
+        update discuss_post set type = #{type}
+        where id = #{id}
+    </update>
 
 </mapper>

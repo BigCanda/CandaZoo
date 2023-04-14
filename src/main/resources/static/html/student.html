@@ -1,21 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>增加学生</title>
-</head>
-<body>
-    <form method = "post" action="/Alpha/student">
-        <p>
-            姓名:<input type = "text" name = "name">
-        </p>
+<template>
+    <div>
+        <div id="scroll-container"
+             @touchstart.stop="handlerTouchStart"
+             @touchmove.stop="handlerTouchMove"
+             @touchend.stop="handlerTouchEnd"
+             ref="scrollContainer"
+             :class="{'transition': isTransition}"
+        >
+            <!-- 添加刷新图片 -->
+            <div class="refresh">
+                <img
+                        src="https://www.easyicon.net/api/resizeApi.php?id=1190769&size=48"
+                >
+            </div>
+            <slot></slot>
+            <!-- 添加加载图片 -->
+            <div class="load">
+                <img src="https://img.lanrentuku.com/img/allimg/1212/5-121204193R5-50.gif">
+            </div>
+        </div>
+    </div>
+</template>
 
-        <p>
-            年龄:<input type = "text" name = "age">
-        </p>
-        <p>
-            <input type = "submit" value= "保存">
-        </p>
-    </form>
-</body>
-</html>
+<script>
+    export default {
+        data () {
+            return {
+                startLocation: '', // 记录鼠标点击的位置
+                moveDistance: 0,  // 记录移动的位置
+                distance: '', // 记录移动的距离
+                isTransition: false // 是否启动transition
+            }
+        },
+        methods: {
+            // 获取手指触屏时的屏幕Y轴位置
+            handlerTouchStart (e) {
+                this.isTransition = false
+                this.startLocation = e.touches[0].pageY
+            },
+            // 获取手指移动的距离
+            handlerTouchMove (e) {
+                this.moveDistance = Math.floor(e.touches[0].pageY - this.startLocation)
+                this.$refs.scrollContainer.style.transform = `translateY(${this.moveDistance}px)`
+            },
+            // 获取手指松开的Y轴位置
+            handlerTouchEnd (e) {
+                this.moveDistance = 0 // 清除已移动的距离
+                this.isTransition = true // 开启transition
+                this.$refs.scrollContainer.style.transform = 'translateY(0px)'
+            }
+        }
+    }
+</script>
+<style scoped>
+    #scroll-container {
+        background-color: yellow;
+    }
+    .transition {
+        transition: all .7s;
+    }
+    /* -----添加新样式------ */
+    .load, .refresh {
+        text-align: center;
+    }
+    .load img, .refresh img {
+        width: 20px;
+    }
+    /* -----添加新样式------ */
+</style>
+
