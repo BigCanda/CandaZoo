@@ -8,7 +8,6 @@ import com.newcoder.community.services.LikeService;
 import com.newcoder.community.services.UserService;
 import com.newcoder.community.util.CommunityConstant;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +21,6 @@ import java.util.Map;
 
 // 23.3.7
 @Controller
-@Primary
 public class HomeController implements CommunityConstant {
     @Autowired
     private DiscussPostService discussPostService;

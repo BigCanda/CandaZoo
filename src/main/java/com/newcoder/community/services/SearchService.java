@@ -1,8 +1,12 @@
 package com.newcoder.community.services;
 import com.newcoder.community.dao.DiscussPostMapper;
+import com.newcoder.community.dao.UserMapper;
 import com.newcoder.community.dao.elasticsearch.DiscussPostRepository;
+import com.newcoder.community.dao.elasticsearch.UserRepository;
 import com.newcoder.community.entity.DiscussPost;
-import com.newcoder.community.entity.SearchResult;
+import com.newcoder.community.entity.SearchPostResult;
+import com.newcoder.community.entity.SearchUserResult;
+import com.newcoder.community.entity.User;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -28,6 +32,10 @@ public class SearchService {
     @Autowired
     private DiscussPostMapper discussPostMapper;
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
     private ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     /*
@@ -36,12 +44,12 @@ public class SearchService {
     @PostConstruct
     public void init() {
         discussPostRepository.deleteAll();
-        System.out.println("自动删除所有帖子");
+        userRepository.deleteAll();
         discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(0,0,discussPostMapper.selectDiscussPostRows(0)));
-        System.out.println("自动注入所有帖子");
+        userRepository.saveAll(userMapper.selectUsers(0, userMapper.selectUserCount()));
     }
 
-    public SearchResult search(String keyword,  Pageable pageable) {
+    public SearchPostResult searchDiscussPost(String keyword, Pageable pageable) {
         List<DiscussPost> posts = new ArrayList<>();
 
         // 构建一个NativeSearchQuery并添加分页条件、排序条件以及高光区域
@@ -106,7 +114,56 @@ public class SearchService {
             }
         }
 
-        return new SearchResult(rows, posts);
+        return new SearchPostResult(rows, posts);
+    }
+
+    public SearchUserResult searchUser(String keyword, Pageable pageable) {
+        List<User> users = new ArrayList<>();
+
+        // 构建一个NativeSearchQuery并添加分页条件、排序条件以及高光区域
+        NativeSearchQuery query = new NativeSearchQueryBuilder()
+                .withQuery(QueryBuilders.multiMatchQuery(keyword, "username"))
+                .withPageable(pageable)
+                .withSort(
+                        SortBuilders.fieldSort("createTime").order(SortOrder.DESC)
+                )
+                .withHighlightFields(
+                        new HighlightBuilder.Field("username").preTags("<em>").postTags("</em>")
+                )
+                .build();
+        // 调用ElasticsearchRestTemplate的search()方法进行查询
+        // 使用SearchHits存储搜索结果
+        SearchHits<User> searchHits = elasticsearchRestTemplate.search(query, User.class);
+        long rows = searchHits.getTotalHits();
+
+        // 遍历搜索结果设置帖子的各个参数
+        if (searchHits.getTotalHits() != 0) {
+            for (SearchHit<User> searchHit : searchHits) {
+                User user = new User();
+
+                int id = searchHit.getContent().getId();
+                user.setId(id);
+
+                String username = searchHit.getContent().getUsername();
+                user.setUsername(username);
+
+                String headerUrl = searchHit.getContent().getHeaderUrl();
+                user.setHeaderUrl(headerUrl);
+
+                Date createTime = searchHit.getContent().getCreateTime();
+                user.setCreateTime(createTime);
+
+                // 获得刚刚构建的高光区域，填到用户名上
+                List<String> contentField = searchHit.getHighlightFields().get("username");
+                if (contentField != null) {
+                    user.setUsername(contentField.get(0));
+                }
+
+                users.add(user);
+            }
+        }
+
+        return new SearchUserResult(rows, users);
     }
 
     public void saveDiscussPost(DiscussPost discussPost) {
@@ -115,6 +172,14 @@ public class SearchService {
 
     public void deleteDiscussPost(DiscussPost discussPost) {
         discussPostRepository.delete(discussPost);
+    }
+
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
+
+    public void deleteUser(User user) {
+        userRepository.delete(user);
     }
 
 }

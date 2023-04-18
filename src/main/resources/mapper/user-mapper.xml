@@ -15,6 +15,20 @@
         from user
         where id = #{id}
     </select>
+    <select id="selectUsers" resultType="User">
+        select <include refid="selectFields"></include>
+        from user
+        where status = 1
+        order by create_time
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="selectUserCount" resultType="int">
+        select count(id)
+        from user
+        where status != 2
+        and status != 0
+    </select>
 
     <select id="selectByName" resultType="User">
         select <include refid="selectFields"></include>

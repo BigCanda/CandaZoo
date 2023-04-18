@@ -152,8 +152,8 @@ public class MessageController implements CommunityConstant {
     @RequestMapping(path = "/notice/list", method = RequestMethod.GET)
     public String getNoticeList(Model model) {
         User user = hostHolder.getUser();
-        int count = 0;
-        int unreadCount = 0;
+        int count;
+        int unreadCount;
         // 查询评论类通知
         Message message = messageService.findLatestNotice(user.getId(), TOPIC_COMMENT);
         Map<String, Object> messageVO = new HashMap<>();
@@ -200,7 +200,7 @@ public class MessageController implements CommunityConstant {
             unreadCount = messageService.findUnreadNoticeCount(user.getId(), TOPIC_LIKE);
             messageVO.put("unreadCount", unreadCount);
         } else {
-            messageVO.put("message", message);
+            messageVO.put("message", null);
         }
         model.addAttribute("likeNotice",messageVO);
 
@@ -224,7 +224,7 @@ public class MessageController implements CommunityConstant {
             unreadCount = messageService.findUnreadNoticeCount(user.getId(), TOPIC_FOLLOW);
             messageVO.put("unreadCount", unreadCount);
         } else {
-            messageVO.put("message", message);
+            messageVO.put("message", null);
         }
         model.addAttribute("followNotice",messageVO);
 
@@ -249,7 +249,7 @@ public class MessageController implements CommunityConstant {
             unreadCount = messageService.findUnreadNoticeCount(user.getId(), TOPIC_PUSH);
             messageVO.put("unreadCount", unreadCount);
         } else {
-            messageVO.put("message", message);
+            messageVO.put("message", null);
         }
         model.addAttribute("followArticleNotice",messageVO);
 
@@ -274,7 +274,7 @@ public class MessageController implements CommunityConstant {
             unreadCount = messageService.findUnreadNoticeCount(user.getId(), TOPIC_TOP);
             messageVO.put("unreadCount", unreadCount);
         } else {
-            messageVO.put("message", message);
+            messageVO.put("message", null);
         }
         model.addAttribute("topNotice",messageVO);
 
@@ -298,7 +298,7 @@ public class MessageController implements CommunityConstant {
             unreadCount = messageService.findUnreadNoticeCount(user.getId(), TOPIC_WONDERFUL);
             messageVO.put("unreadCount", unreadCount);
         } else {
-            messageVO.put("message", message);
+            messageVO.put("message", null);
         }
         model.addAttribute("wonderfulNotice",messageVO);
 

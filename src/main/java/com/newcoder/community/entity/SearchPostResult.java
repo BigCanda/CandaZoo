@@ -2,11 +2,11 @@ package com.newcoder.community.entity;
 
 import java.util.List;
 
-public class SearchResult {
+public class SearchPostResult {
     private long rows;
     private List<DiscussPost> posts;
 
-    public SearchResult(long rows, List<DiscussPost> posts) {
+    public SearchPostResult(long rows, List<DiscussPost> posts) {
         this.rows = rows;
         this.posts = posts;
     }

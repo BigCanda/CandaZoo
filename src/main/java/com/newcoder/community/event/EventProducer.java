@@ -9,8 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EventProducer {
     @Autowired
-    private KafkaTemplate kafkaTemplate;
-
+    private KafkaTemplate<String, Object> kafkaTemplate;
     // 处理事件主题是xxx,然后内容是什么,
     public void fireEvent(Event event) {
         kafkaTemplate.send(event.getTopic(), JSONObject.toJSONString(event));

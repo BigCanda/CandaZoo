@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MailProducer {
     @Autowired
-    private KafkaTemplate kafkaTemplate;
+    private KafkaTemplate<String, Object> kafkaTemplate;
 
     public void fireMail(Mail mail) {
         kafkaTemplate.send("mail", JSONObject.toJSONString(mail));

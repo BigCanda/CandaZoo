@@ -53,7 +53,7 @@ public class CommunityUtil {
         return getJSONString(code,null,null);
     }
 
-    public static Sort getSearchSort() {
+    public static Sort getPostSearchSort() {
 
         List properties = new ArrayList();
 
@@ -63,6 +63,14 @@ public class CommunityUtil {
 
         return Sort.by(properties);
     }
+    public static Sort getUserSearchSort() {
+
+        List properties = new ArrayList();
+        properties.add(new Order(Sort.Direction.DESC, "createTime"));
+
+        return Sort.by(properties);
+    }
+
 
     public static String HighlightString(String content, String keyword) {
         if (content.contains(keyword)) {

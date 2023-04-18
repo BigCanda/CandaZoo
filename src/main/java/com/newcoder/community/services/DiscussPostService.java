@@ -1,12 +1,14 @@
 package com.newcoder.community.services;
 
 import com.newcoder.community.dao.DiscussPostMapper;
-import com.newcoder.community.dao.elasticsearch.DiscussPostRepository;
 import com.newcoder.community.entity.DiscussPost;
 import com.newcoder.community.util.CommunityConstant;
 import com.newcoder.community.util.SensitiveFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
@@ -18,17 +20,14 @@ public class DiscussPostService implements CommunityConstant {
     @Autowired
     private SensitiveFilter sensitiveFilter;
 
-    @Autowired
-    private DiscussPostRepository discussPostRepository;
-
     public List<DiscussPost> findDiscussPosts(int userId, int offset, int limit){
         return discussPostMapper.selectDiscussPosts(userId,offset,limit);
     }
     public int findDiscussPostRows(int userId){
         return discussPostMapper.selectDiscussPostRows(userId);
     }
-
-    public int addDiscussPost(DiscussPost post) {
+    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
+    public void addDiscussPost(DiscussPost post) {
         if (post == null) {
             throw new IllegalArgumentException("参数不能为空");
         }
@@ -39,14 +38,16 @@ public class DiscussPostService implements CommunityConstant {
         post.setTitle(sensitiveFilter.filter(post.getTitle()));
         post.setContent(sensitiveFilter.filter(post.getContent()));
 
-        return discussPostMapper.insertDiscussPost(post);
+        discussPostMapper.insertDiscussPost(post);
     }
 
     public DiscussPost findDiscussPostById(int id) {
         return discussPostMapper.selectDiscussPostById(id);
     }
 
-    public int updateCommentCount(int id,int commentCount) {return discussPostMapper.updateCommentCount(id, commentCount); }
+    public void updateCommentCount(int id, int commentCount) {
+        discussPostMapper.updateCommentCount(id, commentCount);
+    }
 
     public int updateDiscussPostStatus(int id, int status) {
         return discussPostMapper.updateDiscussPostStatus(id, status);

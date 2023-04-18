@@ -4,7 +4,9 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.util.Date;
-@Document(indexName = "discusspost", shards = 6 ,replicas = 3)
+// shards:文档索引分片,增加分片可以增加es响应速度,但是增加网络开销
+// replicas:文档索引副本数
+@Document(indexName = "discusspost")
 public class DiscussPost {
     // Elasticsearch的ID
     @Id

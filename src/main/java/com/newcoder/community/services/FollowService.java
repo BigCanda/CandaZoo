@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
+import reactor.util.annotation.NonNull;
 
 import java.util.*;
 
@@ -21,7 +22,7 @@ public class FollowService implements CommunityConstant {
     @Autowired
     private UserService userService;
     public void follow(int userId, int entityType, int entityId) {
-        redisTemplate.execute(new SessionCallback() {
+        redisTemplate.execute(new SessionCallback<Object>() {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
                 String followeeKey = RedisKeyUtil.getFolloweeKey(userId, entityType);
@@ -37,9 +38,9 @@ public class FollowService implements CommunityConstant {
         });
     }
     public void unfollow(int userId, int entityType, int entityId) {
-        redisTemplate.execute(new SessionCallback() {
+        redisTemplate.execute(new SessionCallback<Object>() {
             @Override
-            public Object execute(RedisOperations operations) throws DataAccessException {
+            public Object execute(@NonNull RedisOperations operations) throws DataAccessException {
                 String followeeKey = RedisKeyUtil.getFolloweeKey(userId, entityType);
                 String followerKey = RedisKeyUtil.getFollowerKey(entityType, entityId);
 

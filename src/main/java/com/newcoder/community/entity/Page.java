@@ -1,13 +1,5 @@
 package com.newcoder.community.entity;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.elasticsearch.core.query.Order;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /*
 封装分页相关信息的组件
  */
@@ -82,7 +74,7 @@ public class Page {
      */
     public int getFrom() {
         int from = current - 2;
-        return from < 1 ? 1 : from;// 小于1就取1，否则取from
+        return Math.max(from, 1);// 小于1就取1，否则取from
     }
     /*
     获取结束页码
@@ -90,7 +82,7 @@ public class Page {
     public int getTo() {
         int to = current + 2;
         int total = getTotal();
-        return to > total ? total : to;
+        return Math.min(to, total);
     }
 
 

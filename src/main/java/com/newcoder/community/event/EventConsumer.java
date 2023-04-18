@@ -36,7 +36,7 @@ public class EventConsumer implements CommunityConstant {
 
 
     @KafkaListener(topics = {TOPIC_COMMENT, TOPIC_FOLLOW, TOPIC_LIKE})
-    public void handleCommentMessage(ConsumerRecord record) {
+    public void handleCommentMessage(ConsumerRecord<String, Object> record) {
         if (record == null || record.value() == null) {
             logger.error("消息内容为空!");
             return;
@@ -61,9 +61,7 @@ public class EventConsumer implements CommunityConstant {
         content.put("entityId",event.getEntityId());
 
         if (!event.getData().isEmpty()) {
-            for (Map.Entry<String, Object> entry : event.getData().entrySet()) {
-                content.put(entry.getKey(), entry.getValue());
-            }
+            content.putAll(event.getData());
         }
 
         message.setContent(JSONObject.toJSONString(content));
@@ -72,7 +70,7 @@ public class EventConsumer implements CommunityConstant {
 
     // 消费发帖事件
     @KafkaListener(topics = {TOPIC_PUBLISH})
-    public void handlePublishConsumer(ConsumerRecord record) {
+    public void handlePublishConsumer(ConsumerRecord<String, Object> record) {
         if (record == null || record.value() == null) {
             logger.error("消息内容为空!");
             return;
@@ -88,7 +86,7 @@ public class EventConsumer implements CommunityConstant {
     }
 
     @KafkaListener(topics = {TOPIC_DELETE})
-    public void handleDeleteConsumer(ConsumerRecord record) {
+    public void handleDeleteConsumer(ConsumerRecord<String, Object> record) {
         if (record == null || record.value() == null) {
             logger.error("消息内容为空!");
             return;
@@ -104,7 +102,7 @@ public class EventConsumer implements CommunityConstant {
     }
 
     @KafkaListener(topics = {TOPIC_PUSH})
-    public void handlePushConsumer(ConsumerRecord record) {
+    public void handlePushConsumer(ConsumerRecord<String, Object> record) {
         if (record == null || record.value() == null) {
             logger.error("消息内容为空!");
             return;
@@ -130,9 +128,7 @@ public class EventConsumer implements CommunityConstant {
         content.put("entityId",event.getEntityId());
 
         if (!event.getData().isEmpty()) {
-            for (Map.Entry<String, Object> entry : event.getData().entrySet()) {
-                content.put(entry.getKey(), entry.getValue());
-            }
+            content.putAll(event.getData());
         }
 
         message.setContent(JSONObject.toJSONString(content));
@@ -141,7 +137,7 @@ public class EventConsumer implements CommunityConstant {
     }
 
     @KafkaListener(topics = {TOPIC_TOP})
-    public void handleTopConsumer(ConsumerRecord record) {
+    public void handleTopConsumer(ConsumerRecord<String, Object> record) {
         if (record == null || record.value() == null) {
             logger.error("消息内容为空!");
             return;
@@ -167,9 +163,7 @@ public class EventConsumer implements CommunityConstant {
         content.put("entityId",event.getEntityId());
 
         if (!event.getData().isEmpty()) {
-            for (Map.Entry<String, Object> entry : event.getData().entrySet()) {
-                content.put(entry.getKey(), entry.getValue());
-            }
+            content.putAll(event.getData());
         }
 
         message.setContent(JSONObject.toJSONString(content));
@@ -178,7 +172,7 @@ public class EventConsumer implements CommunityConstant {
     }
 
     @KafkaListener(topics = {TOPIC_WONDERFUL})
-    public void handleWonderfulConsumer(ConsumerRecord record) {
+    public void handleWonderfulConsumer(ConsumerRecord<String, Object> record) {
         if (record == null || record.value() == null) {
             logger.error("消息内容为空!");
             return;
@@ -204,9 +198,7 @@ public class EventConsumer implements CommunityConstant {
         content.put("entityId",event.getEntityId());
 
         if (!event.getData().isEmpty()) {
-            for (Map.Entry<String, Object> entry : event.getData().entrySet()) {
-                content.put(entry.getKey(), entry.getValue());
-            }
+            content.putAll(event.getData());
         }
 
         message.setContent(JSONObject.toJSONString(content));

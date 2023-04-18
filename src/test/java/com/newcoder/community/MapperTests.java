@@ -142,4 +142,18 @@ public class MapperTests {
         int id = 316;
         discussPostMapper.updateDiscussPostStatus(id, 0);
     }
+
+    @Test
+    public void testSelectAllUser() {
+        List<User> users= userMapper.selectUsers(0 , 0);
+        for (User user : users) {
+            System.out.println(user);
+
+        }
+        try {
+            Thread.sleep(20 * 1000);
+        } catch (Exception e) {
+
+        }
+    }
 }

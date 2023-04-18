@@ -7,18 +7,19 @@ import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
+import reactor.util.annotation.NonNull;
 
 @Service
 public class LikeService {
 
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     // 点赞
     public void like(int userId, int entityType, int entityId, int entityUserId) {
-        redisTemplate.execute(new SessionCallback() {
+        redisTemplate.execute(new SessionCallback<Object>() {
             @Override
-            public Object execute(RedisOperations operations) throws DataAccessException {
+            public Object execute(@NonNull RedisOperations operations) throws DataAccessException {
                 String entityLikeKey = RedisKeyUtil.getEntityLikeKey(entityType, entityId);
                 String userLikeKey = RedisKeyUtil.getUserLikeKey(entityUserId);
                 boolean isMember = operations.opsForSet().isMember(entityLikeKey, userId);

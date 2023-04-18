@@ -2,8 +2,8 @@ package com.newcoder.community.controller;
 
 import com.google.code.kaptcha.Producer;
 import com.newcoder.community.entity.User;
+import com.newcoder.community.services.SearchService;
 import com.newcoder.community.services.UserService;
-import com.newcoder.community.util.CommunityConstant;
 import com.newcoder.community.util.CommunityUtil;
 import com.newcoder.community.util.RedisKeyUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.imageio.ImageIO;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,7 +42,10 @@ public class LoginController {
     private Producer kaptchaProducer;
 
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired
+    private SearchService searchService;
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
@@ -54,8 +56,8 @@ public class LoginController {
     }
     @RequestMapping(path = "/register",method = RequestMethod.POST)
     public String register(Model model, User user, String code/*, HttpSession httpSession*/,
-                           @CookieValue( "kaptchaOwner") String kaptchaOwner) {
-        String kaptcha = null;
+                           @CookieValue( value = "kaptchaOwner" ,required = false) String kaptchaOwner) {
+        String kaptcha;
         if (StringUtils.isNotEmpty(kaptchaOwner)) {
             String redisKey = RedisKeyUtil.getKaptchaKey(kaptchaOwner);
             kaptcha = (String) redisTemplate.opsForValue().get(redisKey);
@@ -72,7 +74,7 @@ public class LoginController {
         Map<String, Object> map = userService.register(user);
         if(map == null || map.isEmpty()) {
             model.addAttribute("msg","注册成功，我们已经向您的邮箱发送了一封激活邮件，请尽快激活!(10分钟内有效)如果没有找到激活邮件，请检查回收站");
-
+            searchService.saveUser(user);
             model.addAttribute("target","/index");
             return "site/operate-result";
         } else {
@@ -104,20 +106,19 @@ public class LoginController {
     // 登录页面跳转
     @RequestMapping(path = "/login",method = RequestMethod.GET)
     public String getLoginPage() {
-        //!
         return "site/login";
     }
 
     // 23.3.8
     // 验证码状态判断
-
     @RequestMapping(path="/login", method = RequestMethod.POST)
     public String login (String username, String password,
-                         String code, boolean rememberMe, Model model/*, HttpSession httpSession*/, HttpServletResponse httpServletResponse
+                         String code, boolean rememberMe, Model model,/*, HttpSession httpSession*/
+                         HttpServletResponse httpServletResponse
                         ,@CookieValue( value = "kaptchaOwner" ,required = false) String kaptchaOwner) {
 
 //        String kaptcha = (String) httpSession.getAttribute("kaptcha");
-        String kaptcha = null;
+        String kaptcha;
         int expiredSeconds = rememberMe ? REMEMBER_EXPIRED_SECONDS : DEFAULT_EXPIRED_SECONDS;
 
         if (StringUtils.isNotEmpty(kaptchaOwner)) {

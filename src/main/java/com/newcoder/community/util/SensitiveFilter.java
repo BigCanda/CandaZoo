@@ -26,15 +26,18 @@ public class SensitiveFilter {
     @PostConstruct
     public void init() {
         try (
-                InputStream is = this.getClass().getClassLoader().getResourceAsStream("sensitive-words.txt");
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is))
-                ) {
+                InputStream is = this.getClass().getClassLoader().getResourceAsStream("sensitive-words.txt")
+        ) {
+            assert is != null;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))
+                    ) {
 
-            String keyword;
-            while ((keyword = reader.readLine()) != null) {
-                this.addKeyword(keyword);
+                String keyword;
+                while ((keyword = reader.readLine()) != null) {
+                    this.addKeyword(keyword);
+                }
+
             }
-
         } catch (IOException e) {
             logger.error("加载敏感词文件失败: " + e.getMessage());
         }
@@ -131,7 +134,7 @@ public class SensitiveFilter {
     }
 
     // 前缀树的节点
-    private class TrieNode {
+    private static class TrieNode {
         // 关键词结束的标识
         private boolean isKeywordEnd = false;
         public boolean isKeywordEnd() {
@@ -143,7 +146,7 @@ public class SensitiveFilter {
         }
 
         // 描述当前节点的子节点(key是下级字符,value是下级节点)
-        private Map<Character, TrieNode> subNodes = new HashMap<>();
+        private final Map<Character, TrieNode> subNodes = new HashMap<>();
 
         // 添加子节点
         public void addSubNode(Character c, TrieNode node) {

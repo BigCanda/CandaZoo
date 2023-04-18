@@ -1,18 +1,33 @@
 package com.newcoder.community.entity;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+
 import java.util.Date;
-
+@Document(indexName = "user")
 public class User {
-
+    @Id
     private int id;
+    @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String username;
+
+    @Field(type = FieldType.Text)
     private String password;
+    @Field(type = FieldType.Text)
     private String salt;
+    @Field(type = FieldType.Text)
     private String email;
+    @Field(type = FieldType.Integer)
     private int type;
+    @Field(type = FieldType.Integer)
     private int status;
+    @Field(type = FieldType.Text)
     private String activationCode;
+    @Field(type = FieldType.Text)
     private String headerUrl;
+    @Field(type = FieldType.Date)
     private Date createTime;
 
     public String getEmail() {

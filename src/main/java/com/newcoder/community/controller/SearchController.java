@@ -1,13 +1,13 @@
 package com.newcoder.community.controller;
 
-import com.newcoder.community.entity.DiscussPost;
-import com.newcoder.community.entity.Page;
-import com.newcoder.community.entity.User;
+import com.newcoder.community.entity.*;
+import com.newcoder.community.services.FollowService;
 import com.newcoder.community.services.LikeService;
 import com.newcoder.community.services.SearchService;
 import com.newcoder.community.services.UserService;
 import com.newcoder.community.util.CommunityConstant;
 import com.newcoder.community.util.CommunityUtil;
+import com.newcoder.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,19 +32,27 @@ public class SearchController implements CommunityConstant {
     @Autowired
     private LikeService likeService;
 
-    @RequestMapping(path = "/search", method = RequestMethod.GET)
-    public String search(String keyword, Model model, Page page) {
+    @Autowired
+    private HostHolder hostHolder;
 
-        Sort sort = CommunityUtil.getSearchSort();
+    @Autowired
+    private FollowService followService;
+
+    @RequestMapping(path = "/searchPost", method = RequestMethod.GET)
+    public String searchDiscussPost(String keyword, Model model, Page page) {
+
+        Sort sort = CommunityUtil.getPostSearchSort();
 
 
         Pageable pageable = PageRequest.of(page.getCurrent() - 1, page.getLimit(),sort);
-        page.setPath("/search?keyword=" + keyword);
+        page.setPath("/searchPost?keyword=" + keyword);
 
-        long rows = searchService.search(keyword, pageable).getRows();
+        SearchPostResult searchPostResult = searchService.searchDiscussPost(keyword, pageable);
+
+        long rows = searchPostResult.getRows();
         page.setRows((int) rows);
 
-        List<DiscussPost> list = searchService.search(keyword, pageable).getPosts();
+        List<DiscussPost> list = searchPostResult.getPosts();
         List<Map<String,Object>> discussPosts = new ArrayList<>();
         if (list != null) {
             for (DiscussPost discussPost : list) {
@@ -62,7 +70,46 @@ public class SearchController implements CommunityConstant {
         model.addAttribute("discussPosts",discussPosts);
         model.addAttribute("keyword",keyword);
         model.addAttribute("rows",rows);
-        return "site/search";
+
+        return "site/search-post";
+    }
+    @RequestMapping(path = "/searchUser", method = RequestMethod.GET)
+    public String searchUser(String keyword, Model model, Page page) {
+
+        User loginUser = hostHolder.getUser();
+        Sort sort = CommunityUtil.getUserSearchSort();
+        Pageable pageable = PageRequest.of(page.getCurrent() - 1, page.getLimit(), sort);
+
+        page.setPath("/searchUser?keyword=" + keyword);
+
+        SearchUserResult searchUserResult = searchService.searchUser(keyword, pageable);
+
+        long rows = searchUserResult.getRows();
+        page.setRows((int) rows);
+
+        List<User> list = searchUserResult.getUsers();
+        List<Map<String,Object>> users = new ArrayList<>();
+        if (list != null) {
+            for (User user : list) {
+                Map<String,Object> map = new HashMap<>();
+                map.put("user",user);
+                map.put("hasFollowed", hasFollowed(user.getId()));
+                users.add(map);
+            }
+        }
+
+        model.addAttribute("users",users);
+        model.addAttribute("keyword",keyword);
+        model.addAttribute("rows",rows);
+        model.addAttribute("loginUser",loginUser);
+
+        return "site/search-user";
     }
 
+    private boolean hasFollowed(int userId) {
+        if(hostHolder.getUser() == null) {
+            return false;
+        }
+        return followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
+    }
 }

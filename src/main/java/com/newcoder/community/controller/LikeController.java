@@ -1,8 +1,5 @@
 package com.newcoder.community.controller;
 
-import com.newcoder.community.annotation.LoginRequired;
-import com.newcoder.community.entity.Comment;
-import com.newcoder.community.entity.DiscussPost;
 import com.newcoder.community.entity.Event;
 import com.newcoder.community.entity.User;
 import com.newcoder.community.event.EventProducer;

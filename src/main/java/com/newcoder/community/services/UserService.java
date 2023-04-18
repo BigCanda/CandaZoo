@@ -28,10 +28,12 @@ public class UserService implements CommunityConstant {
     private TemplateEngine templateEngine;
 
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
     private MailProducer mailProducer;
+
+
 
     @Value("${community.path.domain}")
     private String domain;
@@ -125,6 +127,8 @@ public class UserService implements CommunityConstant {
         user.setCreateTime(new Date());
         userMapper.insertUser(user);// 已经自动生成id并且回填了，详见配置文件
 
+
+
         // 发送激活邮件
         Context context = new Context();
         context.setVariable("email",user.getEmail());
@@ -199,7 +203,7 @@ public class UserService implements CommunityConstant {
         loginTicket.setUserId(user.getId());
         loginTicket.setTicket(CommunityUtil.generateUUID());
         loginTicket.setStatus(0);
-        loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSecond * 1000));
+        loginTicket.setExpired(new Date(System.currentTimeMillis() + expiredSecond * 1000L));
 //        loginTicketMapper.insertLoginTicket(loginTicket);
 
         String redisKey = RedisKeyUtil.getTicketKey(loginTicket.getTicket());
